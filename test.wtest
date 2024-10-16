@@ -1,0 +1,100 @@
+import armas.*
+import gladiadores.*
+import grupos.*
+import coliseo.*
+
+
+describe "Test de peleas" {
+
+    const espada = new ArmaDeFilo(longitud = 10, filo = 0.9)
+    const daga = new ArmaDeFilo(longitud = 3, filo = 1)
+    const maza = new ArmaContundente(peso = 8)
+    const martillo = new ArmaContundente(peso = 5)
+
+    const m1 = new Mirmillones(arma = espada, armadura = casco, fuerza = 10)
+    const d1 = new Dimachaerus(armas = [daga, martillo, maza], destreza = 12)
+    const m2 = new Mirmillones(arma = daga, armadura = escudo, fuerza = 15)
+    const d2 = new Dimachaerus(armas = [espada, maza, martillo], destreza = 10)
+
+  test "Poder de ataque de m1" {
+    assert.equals(19, m1.poderDeAtaque())
+  }
+
+  test "Defensa de m1" {
+    assert.equals(25, m1.defensa())
+  }
+
+  test "Poder de ataque de d1" {
+    assert.equals(26, d1.poderDeAtaque())
+  }
+
+  test "Defensa de d1" {
+    assert.equals(6, d1.defensa())
+  }
+
+  test "m1 pelea contra d1" {
+    m1.pelear(d1)
+    assert.equals(100-13, d1.vida())
+    assert.equals(99, m1.vida())
+  }
+
+  test "m1 crea un grupo con m2 y d1 con d2, los mas fuertes son m2 y d1" {
+    assert.equals(m2, m1.crearUnGrupo(m2).elMasFuerte())
+    assert.equals(d1, d1.crearUnGrupo(d2).elMasFuerte())
+    assert.equals("D-58", d1.crearUnGrupo(d2).nombre())
+    assert.equals("mirmillolandia", m1.crearUnGrupo(m2).nombre())
+  }
+
+  test "el grupo de los mirmillones pelea contra el grupo de los dimachaerus" {
+    const mirmillones = m1.crearUnGrupo(m2)
+    const dimachaerus = d1.crearUnGrupo(d2)
+
+    mirmillones.combatir(dimachaerus)
+
+    assert.equals(1, mirmillones.peleas())
+    assert.equals(1, dimachaerus.peleas())
+    assert.equals(86.5, m2.vida())
+    assert.equals(65.5, d1.vida())
+  }
+
+  test "El coliseo hace que el grupo de los mirmillones pelee contra d2" {
+    const mirmillones = m1.crearUnGrupo(m2)
+
+    coliseo.combatirConGladiador(mirmillones, d2)
+
+    assert.equals(1, mirmillones.peleas())
+    assert.equals(68.5, m2.vida())
+    assert.equals(62.5, d2.vida())
+  }
+
+  test "Luego de que los mirmillones peleen contra d2, el coliseo cura a d2" {
+    const mirmillones = m1.crearUnGrupo(m2)
+    coliseo.combatirConGladiador(mirmillones, d2)
+
+    coliseo.curarUno(d2)
+
+    assert.equals(77.5, d2.vida())
+  }
+
+  test "Luego de que los mirmillones peleen contra d2, el coliseo cura a los mirmillones" {
+    const mirmillones = m1.crearUnGrupo(m2)
+    coliseo.combatirConGladiador(mirmillones, d2)
+
+    coliseo.curarGrupo(mirmillones)
+
+    assert.equals(115, m1.vida()) //a lo mejor poner un tope para que no pase de 100
+    assert.equals(83.5, m2.vida())
+  }
+  
+  test "El coliseo hace que mirmillones peleen contra dimachaerus" {
+    const mirmillones = m1.crearUnGrupo(m2)
+    const dimachaerus = d1.crearUnGrupo(d2)
+
+    coliseo.combatirEnGrupos(mirmillones, dimachaerus)
+
+    assert.equals(1, mirmillones.peleas())
+    assert.equals(1, dimachaerus.peleas())
+    assert.equals(86.5, m2.vida())
+    assert.equals(65.5, d1.vida())
+  }
+} 
